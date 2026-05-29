@@ -11,5 +11,8 @@
     <PackageVersion Include="Umbraco.Cms.Api.Management" Version="17.4.2" />
     <PackageVersion Include="Umbraco.Cms.Web.Common" Version="17.4.2" />
     <PackageVersion Include="Umbraco.Cms.Web.Website" Version="17.4.2" />
+
+    <!-- Ships transitively with Umbraco's imaging; referenced directly for the outpaint canvas/mask and WebP encode. Floats to align with the host. -->
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.*" />
   </ItemGroup>
 </Project>

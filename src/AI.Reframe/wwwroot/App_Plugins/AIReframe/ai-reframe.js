@@ -1,32 +1,39 @@
-const a = [
+const e = [
   {
     name: "AIReframe Entrypoint",
     alias: "AI.Reframe.Entrypoint",
     type: "backofficeEntryPoint",
     js: () => import("./entrypoint-CdWgnGuk.js")
   }
-], e = [
+], a = [
   {
-    name: "AIReframe Dashboard",
-    alias: "AI.Reframe.Dashboard",
-    type: "dashboard",
-    js: () => import("./dashboard.element-BkTqGWMb.js"),
+    name: "AI.Reframe Workspace View",
+    alias: "AI.Reframe.WorkspaceView",
+    type: "workspaceView",
+    js: () => import("./reframe-workspace-view.element-Bf5vtLK_.js"),
     meta: {
-      label: "Example Dashboard",
-      pathname: "example-dashboard"
+      label: "Reframe",
+      pathname: "reframe",
+      icon: "icon-crop"
     },
     conditions: [
+      // Only in the Media workspace…
       {
-        alias: "Umb.Condition.SectionAlias",
-        match: "Umb.Section.Content"
+        alias: "Umb.Condition.WorkspaceAlias",
+        match: "Umb.Workspace.Media"
+      },
+      // …and only for Image media (ADR-0001).
+      {
+        alias: "Umb.Condition.WorkspaceContentTypeAlias",
+        match: "Image"
       }
     ]
   }
-], t = [
-  ...a,
-  ...e
+], i = [
+  ...e,
+  ...a
 ];
 export {
-  t as manifests
+  i as manifests
 };
 //# sourceMappingURL=ai-reframe.js.map
