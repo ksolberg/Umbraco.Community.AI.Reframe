@@ -2,7 +2,8 @@
     "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
     "AuthorDetails": {
       "Name": "Kenneth Solberg",
-      "ImageUrl": "https://github.com/ksolberg.png"
+      "ImageUrl": "https://github.com/ksolberg.png",
+      "Description": "Kenneth Solberg has been building solutions with Umbraco since 2006."
     },
     "Category": "Media",
     "Description": "Reframe image media to a new aspect ratio without leaving the Umbraco backoffice. Open the Reframe view on any Image media item and retarget it either by Crop (instant, free, geometric) or by AI Outpaint, where OpenAI gpt-image-2 invents the new edges so no original content is lost. Preview the before/after with a generated-region indicator, then Accept to save the result as a new media item beside the original — the source image is never modified. Outpaint requires your own OpenAI API key and incurs OpenAI usage cost; Crop is always free.",
