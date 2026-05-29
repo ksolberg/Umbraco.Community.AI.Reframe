@@ -1,0 +1,35 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#211c2e"/>
+      <stop offset="1" stop-color="#181423"/>
+    </linearGradient>
+    <!-- Faint magenta checkerboard = the AI-generated / to-be-filled region -->
+    <pattern id="gen" width="44" height="44" patternUnits="userSpaceOnUse">
+      <rect width="44" height="44" fill="#241f33"/>
+      <rect x="0" y="0" width="22" height="22" fill="#ec4899" fill-opacity="0.16"/>
+      <rect x="22" y="22" width="22" height="22" fill="#ec4899" fill-opacity="0.16"/>
+    </pattern>
+    <clipPath id="frameInner">
+      <rect x="70" y="158" width="372" height="196" rx="8"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Generated region: checkerboard across the full inner frame... -->
+  <g clip-path="url(#frameInner)">
+    <rect x="70" y="158" width="372" height="196" fill="url(#gen)"/>
+  </g>
+
+  <!-- ...with the original image (neutral square) sitting on top, leaving the side margins generated -->
+  <rect x="158" y="158" width="196" height="196" rx="12" fill="#94a3b8"/>
+  <rect x="158" y="158" width="196" height="196" rx="12" fill="#aab4c4" fill-opacity="0.25"/>
+
+  <!-- The new wider aspect-ratio frame (16:9), in the magenta AI signal colour -->
+  <rect x="56" y="144" width="400" height="224" rx="26" fill="none" stroke="#ec4899" stroke-width="16"/>
+
+  <!-- Single AI sparkle in the left generated margin -->
+  <path d="M114 196 C116 210 118 212 132 214 C118 216 116 218 114 232 C112 218 110 216 96 214 C110 212 112 210 114 196 Z" fill="#ec4899"/>
+</svg>
