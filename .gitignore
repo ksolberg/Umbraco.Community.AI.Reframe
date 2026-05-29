@@ -357,3 +357,5 @@ src/.idea
 
 # MacOS
 .DS_Store
+# Claude Code (kept locally, not tracked)
+.claude/
