@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
@@ -22,11 +23,16 @@ public sealed class OpenAiGptImageProvider : IReframeImageProvider
 
     private readonly HttpClient _http;
     private readonly OpenAiImageOptions _options;
+    private readonly ILogger<OpenAiGptImageProvider> _logger;
 
-    public OpenAiGptImageProvider(HttpClient http, IOptions<AIReframeOptions> options)
+    public OpenAiGptImageProvider(
+        HttpClient http,
+        IOptions<AIReframeOptions> options,
+        ILogger<OpenAiGptImageProvider> logger)
     {
         _http = http;
         _options = options.Value.OpenAI;
+        _logger = logger;
     }
 
     public string Name => $"OpenAI {_options.Model}";
@@ -42,22 +48,38 @@ public sealed class OpenAiGptImageProvider : IReframeImageProvider
         }
 
         var plan = request.Plan;
+
+        // gpt-image-2 only accepts sizes that meet its constraints (multiple-of-16 edges, pixel
+        // band, ≤3:1, ≤3840px). Snap the planned output to a valid size for the request, then resize
+        // the result back to the planned output below so the rest of the pipeline is unaffected.
+        var apiSize = GptImageSize.Constrain(plan.Output);
+        var apiPlan = plan with
+        {
+            Output = apiSize,
+            SourceRect = ReframeGeometry.SourceRectWithin(apiSize, plan.Source),
+        };
+
         OutpaintCanvas canvas;
         try
         {
-            canvas = OutpaintCanvasBuilder.Build(request.SourceImage, plan);
+            canvas = OutpaintCanvasBuilder.Build(request.SourceImage, apiPlan);
         }
         catch (Exception ex) when (ex is not ReframeProviderException)
         {
             throw new ReframeProviderException("Failed to prepare the outpaint canvas from the source image.", ex);
         }
 
-        using var content = BuildMultipart(canvas, request.Prompt ?? _options.DefaultPrompt, plan.Output);
-        using var message = new HttpRequestMessage(HttpMethod.Post, $"{_options.BaseUrl.TrimEnd('/')}/images/edits")
+        var url = $"{_options.BaseUrl.TrimEnd('/')}/images/edits";
+        using var content = BuildMultipart(canvas, request.Prompt ?? _options.DefaultPrompt, apiSize);
+        using var message = new HttpRequestMessage(HttpMethod.Post, url)
         {
             Content = content,
         };
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
+
+        _logger.LogInformation(
+            "AI.Reframe: outpaint → {Model} {Width}x{Height} (planned {PlannedWidth}x{PlannedHeight}) via {Url}",
+            _options.Model, apiSize.Width, apiSize.Height, plan.Output.Width, plan.Output.Height, url);
 
         var stopwatch = Stopwatch.StartNew();
         HttpResponseMessage response;
@@ -65,12 +87,20 @@ public sealed class OpenAiGptImageProvider : IReframeImageProvider
         {
             response = await _http.SendAsync(message, HttpCompletionOption.ResponseContentRead, cancellationToken);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            _logger.LogInformation("AI.Reframe: outpaint cancelled by caller after {ElapsedMs}ms", stopwatch.ElapsedMilliseconds);
+            throw;
+        }
+        catch (OperationCanceledException ex)
+        {
+            // Not the caller's token → the HttpClient timeout elapsed.
+            _logger.LogWarning(ex, "AI.Reframe: outpaint timed out after {ElapsedMs}ms (provider timeout)", stopwatch.ElapsedMilliseconds);
             throw;
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "AI.Reframe: outpaint request could not be sent");
             throw new ReframeProviderException("The OpenAI image request could not be sent.", ex);
         }
 
@@ -81,12 +111,19 @@ public sealed class OpenAiGptImageProvider : IReframeImageProvider
 
             if (!response.IsSuccessStatusCode)
             {
+                _logger.LogWarning(
+                    "AI.Reframe: outpaint failed ({Status}) after {ElapsedMs}ms (request {RequestId}): {Error}",
+                    (int)response.StatusCode, stopwatch.ElapsedMilliseconds, requestId, ExtractError(body));
                 throw new ReframeProviderException(
                     $"OpenAI image edit failed ({(int)response.StatusCode}): {ExtractError(body)}");
             }
 
             var imageBytes = ParseFirstImage(body);
             stopwatch.Stop();
+
+            _logger.LogInformation(
+                "AI.Reframe: outpaint completed in {ElapsedMs}ms (request {RequestId})",
+                stopwatch.ElapsedMilliseconds, string.IsNullOrEmpty(requestId) ? "n/a" : requestId);
 
             var normalized = NormalizeToOutput(imageBytes, plan.Output);
             return new OutpaintResult(

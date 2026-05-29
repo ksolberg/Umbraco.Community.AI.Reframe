@@ -32,8 +32,9 @@ public sealed class OpenAiImageOptions
         "lighting, textures and perspective so the added regions are indistinguishable from the original. " +
         "Do not add new subjects, text or borders.";
 
-    /// <summary>Per-request timeout for the provider call.</summary>
-    public int TimeoutSeconds { get; set; } = 120;
+    /// <summary>Per-request timeout for the provider call. gpt-image-2's reasoning ("thinking") pass can make
+    /// a single edit run well over a minute, so this is generous; it caps how long Generate can appear to hang.</summary>
+    public int TimeoutSeconds { get; set; } = 180;
 }
 
 public sealed class ReframeOutputOptions

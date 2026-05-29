@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using AI.Reframe.Reframing;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
@@ -38,7 +39,7 @@ public class OpenAiGptImageProviderTests
         {
             OpenAI = { ApiKey = "sk-test", BaseUrl = "https://api.test/v1", Model = "gpt-image-2" },
         });
-        return new OpenAiGptImageProvider(new HttpClient(handler), options);
+        return new OpenAiGptImageProvider(new HttpClient(handler), options, NullLogger<OpenAiGptImageProvider>.Instance);
     }
 
     [Fact]
@@ -67,11 +68,13 @@ public class OpenAiGptImageProviderTests
         Assert.Contains("name=model", handler.Body);
         Assert.Contains("gpt-image-2", handler.Body);
         Assert.Contains("name=size", handler.Body);
-        Assert.Contains("20x10", handler.Body); // output dimensions
+        // The wire size is the planned 20x10 snapped to a gpt-image-2-valid size, not 20x10 itself.
+        var apiSize = GptImageSize.Constrain(new PixelSize(20, 10));
+        Assert.Contains($"{apiSize.Width}x{apiSize.Height}", handler.Body);
         Assert.Contains("name=image", handler.Body);
         Assert.Contains("name=mask", handler.Body);
 
-        // Parsed result
+        // Parsed result: normalized back to the planned output, original footprint preserved.
         Assert.Equal(new PixelSize(20, 10), result.Size);
         Assert.Equal("req_abc123", result.RequestId);
         Assert.NotEmpty(result.Image);
@@ -99,7 +102,8 @@ public class OpenAiGptImageProviderTests
         var handler = new StubHandler(() => new HttpResponseMessage(HttpStatusCode.OK));
         var provider = new OpenAiGptImageProvider(
             new HttpClient(handler),
-            Options.Create(new AIReframeOptions { OpenAI = { ApiKey = null } }));
+            Options.Create(new AIReframeOptions { OpenAI = { ApiKey = null } }),
+            NullLogger<OpenAiGptImageProvider>.Instance);
 
         var ex = await Assert.ThrowsAsync<ReframeProviderException>(() => provider.OutpaintAsync(BuildRequest()));
         Assert.Contains("API key", ex.Message);

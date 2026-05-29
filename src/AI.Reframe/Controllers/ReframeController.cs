@@ -2,6 +2,7 @@ using AI.Reframe.Reframing;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Umbraco.Cms.Core.Security;
 
@@ -22,6 +23,7 @@ public class ReframeController : AIReframeApiControllerBase
     private readonly ReframeCandidateCache _candidates;
     private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
     private readonly AIReframeOptions _options;
+    private readonly ILogger<ReframeController> _logger;
 
     public ReframeController(
         ReframeMediaReader reader,
@@ -29,7 +31,8 @@ public class ReframeController : AIReframeApiControllerBase
         IReframeImageProvider imageProvider,
         ReframeCandidateCache candidates,
         IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
-        IOptions<AIReframeOptions> options)
+        IOptions<AIReframeOptions> options,
+        ILogger<ReframeController> logger)
     {
         _reader = reader;
         _writer = writer;
@@ -37,6 +40,7 @@ public class ReframeController : AIReframeApiControllerBase
         _candidates = candidates;
         _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
         _options = options.Value;
+        _logger = logger;
     }
 
     /// <summary>Source dimensions plus, for each preset ratio, whether crop is offered and what it costs.</summary>
@@ -117,7 +121,17 @@ public class ReframeController : AIReframeApiControllerBase
         }
         catch (ReframeProviderException ex)
         {
+            _logger.LogWarning(ex, "AI.Reframe: outpaint provider error for media {MediaKey}", request.MediaKey);
             return StatusCode(StatusCodes.Status502BadGateway, ex.Message);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            // The provider's own timeout elapsed (not a client disconnect): surface it as a gateway timeout
+            // so the editor sees a clear error instead of a spinner that appears to hang.
+            _logger.LogWarning("AI.Reframe: outpaint timed out for media {MediaKey}", request.MediaKey);
+            return StatusCode(
+                StatusCodes.Status504GatewayTimeout,
+                "The image provider did not respond in time. No changes were made to your image.");
         }
 
         var encoded = ReframeImageProcessor.Encode(result.Image, _options.Output);
