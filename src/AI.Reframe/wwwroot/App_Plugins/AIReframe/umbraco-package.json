@@ -1,0 +1,14 @@
+{
+  "id": "AI.Reframe",
+  "name": "AI.Reframe",
+  "version": "0.0.0",
+  "allowTelemetry": true,
+  "extensions": [
+    {
+      "name": "AIReframe Bundle",
+      "alias": "AI.Reframe.Bundle",
+      "type": "bundle",
+      "js": "/App_Plugins/AIReframe/ai-reframe.js"
+    }
+  ]
+}
