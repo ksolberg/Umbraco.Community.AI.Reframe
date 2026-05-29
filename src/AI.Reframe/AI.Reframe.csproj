@@ -9,9 +9,9 @@
   <PropertyGroup>
     <Product>Umbraco.Community.AI.Reframe</Product>
     <PackageId>Umbraco.Community.AI.Reframe</PackageId>
-    <Title>AI.Reframe </Title>
-    <Description>...</Description>
-    <PackageTags>umbraco;umbraco-marketplace</PackageTags>
+    <Title>AI.Reframe</Title>
+    <Description>Reframe image media to a new aspect ratio without leaving the Umbraco backoffice. A Reframe view on every Image media item lets editors retarget a picture either by Crop (instant, free, geometric) or by AI Outpaint (OpenAI gpt-image-2 invents the new edges so no content is lost). Preview before/after, then Accept to save the result as a new media item — the original is never changed. Outpaint requires your own OpenAI API key and incurs OpenAI usage cost; Crop is free.</Description>
+    <PackageTags>umbraco;umbraco-marketplace;media;images;ai;openai;aspect-ratio;crop;outpaint;backoffice</PackageTags>
     <Authors>Kenneth Solberg</Authors>
     <Copyright>$([System.DateTime]::UtcNow.ToString(`yyyy`)) © Kenneth Solberg</Copyright>
     <PackageProjectUrl>https://github.com/ksolberg/Umbraco.Community.AI.Reframe</PackageProjectUrl>
@@ -19,7 +19,7 @@
     <PackageReadmeFile>README_nuget.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon></PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,6 +43,24 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
+
+  <!--
+    Build the Lit/Vite backoffice client before the .NET build so the packed wwwroot assets are
+    always current. Runs only when building this project from source (the Client folder is present);
+    it never runs for consumers who install the NuGet package. Set /p:SkipClientBuild=true to bypass.
+  -->
+  <Target Name="BuildReframeClient"
+          BeforeTargets="Build"
+          Condition="'$(SkipClientBuild)' != 'true' AND Exists('$(MSBuildProjectDirectory)/Client/package.json')">
+    <Message Importance="high" Text="AI.Reframe: building backoffice client (npm)..." />
+    <Exec Command="npm ci" WorkingDirectory="$(MSBuildProjectDirectory)/Client"
+          Condition="!Exists('$(MSBuildProjectDirectory)/Client/node_modules')" />
+    <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)/Client" />
+  </Target>
 
 </Project>
