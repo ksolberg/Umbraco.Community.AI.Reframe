@@ -10,5 +10,19 @@
     "IssueTrackerUrl": "https://github.com/ksolberg/Umbraco.Community.AI.Reframe/issues",
     "PackageType": "Package",
     "Tags": [ "Media", "Images", "AI", "OpenAI", "Aspect Ratio", "Crop", "Outpaint", "Backoffice", "Editor Tools" ],
+    "Screenshots": [
+      {
+        "ImageUrl": "https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/1.png",
+        "Caption": "The Reframe view on an Image media item: pick a target aspect ratio and a mode (Crop or Outpaint), with an honest estimate of how much will change."
+      },
+      {
+        "ImageUrl": "https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/2.png",
+        "Caption": "An outpainted preview with the AI-generated region outlined — Save as new, Regenerate, or Cancel. The original is never touched."
+      },
+      {
+        "ImageUrl": "https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/3.png",
+        "Caption": "Compare before and after with the slider before accepting the result."
+      }
+    ],
     "Title": "AI.Reframe"
   }
