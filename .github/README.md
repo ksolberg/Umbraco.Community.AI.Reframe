@@ -15,9 +15,7 @@ Preview the result with a before/after compare and a generated-region indicator,
 
 ## Demo
 
-[![Watch the AI.Reframe demo on YouTube](https://img.youtube.com/vi/ck79UJmuOpI/maxresdefault.jpg)](https://www.youtube.com/watch?v=ck79UJmuOpI)
-
-▶️ [Watch the demo on YouTube](https://www.youtube.com/watch?v=ck79UJmuOpI)
+https://github.com/user-attachments/assets/d0e0f7e0-c603-4491-b9a3-ace7316d173a
 
 ## Screenshots
 
