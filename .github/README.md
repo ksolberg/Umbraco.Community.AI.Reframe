@@ -13,6 +13,12 @@ AI.Reframe adds a **Reframe** view to every Image media item. Pick a target rati
 
 Preview the result with a before/after compare and a generated-region indicator, then **Accept** to save it as a **new media item** next to the original. The source image is never modified.
 
+## Demo
+
+[![Watch the AI.Reframe demo on YouTube](https://img.youtube.com/vi/ck79UJmuOpI/maxresdefault.jpg)](https://www.youtube.com/watch?v=ck79UJmuOpI)
+
+▶️ [Watch the demo on YouTube](https://www.youtube.com/watch?v=ck79UJmuOpI)
+
 ## Screenshots
 
 <img alt="The Reframe view: choose a target aspect ratio and Crop or Outpaint mode" src="https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/1.png">
