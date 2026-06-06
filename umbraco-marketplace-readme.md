@@ -18,6 +18,18 @@ Preview the result with a before/after compare slider and a generated-region ind
 - Non-destructive: results are always saved as a new item, so the original stays intact.
 - Free by default — Crop needs no API key and incurs no cost.
 
+## Demo
+
+https://github.com/user-attachments/assets/d0e0f7e0-c603-4491-b9a3-ace7316d173a
+
+## Screenshots
+
+<img alt="The Reframe view: choose a target aspect ratio and Crop or Outpaint mode" src="https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/1.png">
+
+<img alt="Outpainted preview with the generated region outlined" src="https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/2.png">
+
+<img alt="Before/after compare slider" src="https://raw.githubusercontent.com/ksolberg/Umbraco.Community.AI.Reframe/main/docs/screenshots/3.png">
+
 ## Requirements
 
 - Umbraco CMS **17+**
